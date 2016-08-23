@@ -1,13 +1,26 @@
 machine:
+  pre:
+    - cat /etc/*release
+    - pyenv global 2.7.11 3.5.1
   services:
     - docker
 
 dependencies:
   override:
-    - sudo pip install --upgrade docker-compose==1.3.3
+    - sudo apt-get install python-dev
+    - sudo pip install --upgrade docker-compose==1.8.0
 
 test:
+  pre:
+    - which python
+    - v=$(python --version 2>& 1); if [ "$v" == "Python 2.7.11" ]; then echo "$v OK"; else ! echo "$v ERR"; fi
+    - which python2
+    - v=$(python2 --version 2>& 1); if [ "$v" == "Python 2.7.11" ]; then echo "$v OK"; else ! echo "$v ERR"; fi
+    - which python3
+    - v=$(python3 --version 2>& 1); if [ "$v" == "Python 3.5.1" ]; then echo "$v OK"; else ! echo "$v ERR"; fi
+
   override:
+    - python3 -c 'print("OK")'
     - docker-compose run -d --no-deps web
     - cd app; mocha
 
